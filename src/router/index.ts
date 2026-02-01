@@ -22,12 +22,12 @@ router.beforeEach((to, from, next) => {
     }
   }
 
-  if (to.meta.public === true && isAuthenticated) {
+  if (to.meta?.public === true && isAuthenticated) {
     next({ name: "lines" });
     return;
   }
 
-  if (to.meta.public === false && !isAuthenticated) {
+  if (to.meta?.public === false && !isAuthenticated) {
     next({ name: "login" });
     return;
   }
