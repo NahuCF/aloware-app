@@ -1,3 +1,12 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.el-form-item {
+    margin-bottom: 12px;
+}
+
+.el-form-item__label {
+    line-height: unset !important;
+    padding-bottom: 4px;
+}
