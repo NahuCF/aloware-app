@@ -41,9 +41,7 @@
         <div class="mt-4">
           <div class="flex justify-between items-center mb-3">
             <span class="text-sm font-medium text-gray-700">IVR Options</span>
-            <el-button size="mini" @click="addStep(form.ivr_steps)"
-              >Add Option</el-button
-            >
+            <el-button size="mini" @click="addStep">Add Option</el-button>
           </div>
 
           <div v-if="form.ivr_steps.length === 0" class="text-gray-500 text-sm">
@@ -52,11 +50,12 @@
 
           <ivr-step-editor
             v-else
-            :steps="form.ivr_steps"
+            v-model="form.ivr_steps"
+            :users="users"
             :lines="lines"
             :current-line-id="editingId"
-            @add="addStep"
-            @remove="removeStep"
+            :languages="languages"
+            :skills="skills"
           />
         </div>
       </el-form>
@@ -75,16 +74,19 @@
 import { defineComponent } from "vue";
 import { API } from "@/services";
 import { createCrudMixin } from "@/mixins/crudMixin";
-import type { Line, IvrStep } from "@/types";
+import type { Line, IvrStep, User, Language, Skill } from "@/types";
 import IvrStepEditor from "@/components/IvrStepEditor.vue";
 
 export default defineComponent({
-  name: "Lines",
+  name: "LinesView",
   components: { IvrStepEditor },
   mixins: [createCrudMixin({ api: API.line, fetchMethod: "fetchData" })],
   data() {
     return {
       lines: [] as Line[],
+      users: [] as User[],
+      languages: [] as Language[],
+      skills: [] as Skill[],
       loading: false,
       showDialog: false,
       editingId: null as number | null,
@@ -102,8 +104,16 @@ export default defineComponent({
     async fetchData() {
       this.loading = true;
       try {
-        const response = await API.line.index();
-        this.lines = response.data.data;
+        const [linesRes, usersRes, langRes, skillRes] = await Promise.all([
+          API.line.index(),
+          API.user.index(),
+          API.language.index(),
+          API.skill.index(),
+        ]);
+        this.lines = linesRes.data.data;
+        this.users = usersRes.data.data;
+        this.languages = langRes.data.data;
+        this.skills = skillRes.data.data;
       } catch (error) {
         console.error("Failed to fetch data:", error);
       } finally {
@@ -137,16 +147,17 @@ export default defineComponent({
         console.error("Failed to fetch line:", error);
       }
     },
-    addStep(steps: IvrStep[]) {
-      steps.push({
-        digit: "",
-        label: "",
-        action_type: "menu",
-        sub_steps: [],
-      });
-    },
-    removeStep(steps: IvrStep[], index: number) {
-      steps.splice(index, 1);
+    addStep() {
+      this.form.ivr_steps = [
+        ...this.form.ivr_steps,
+        {
+          digit: "",
+          label: "",
+          action_type: "menu",
+          context: {},
+          sub_steps: [],
+        },
+      ];
     },
     handleSave() {
       const data = {
