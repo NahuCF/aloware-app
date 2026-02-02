@@ -190,6 +190,10 @@ export default defineComponent({
           this.deviceReady = false;
         });
 
+        this.device.on("tokenWillExpire", async () => {
+          await this.refreshToken();
+        });
+
         this.device.on("incoming", (call: Call) => {
           this.incomingCall = call;
           this.dialogVisible = true;
@@ -206,6 +210,18 @@ export default defineComponent({
         await this.device.register();
       } catch (error) {
         this.$message.error("Failed to initialize softphone");
+      }
+    },
+
+    async refreshToken() {
+      if (!this.device) return;
+
+      try {
+        const response = await API.voice.getToken();
+        const { token } = response.data;
+        this.device.updateToken(token);
+      } catch (error) {
+        this.$message.error("Refresh token failed. Again...");
       }
     },
 
