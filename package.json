@@ -10,6 +10,7 @@
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore"
   },
   "dependencies": {
+    "@twilio/voice-sdk": "^2.18.0",
     "axios": "^1.13.4",
     "element-ui": "^2.15.14",
     "vue": "^2.7.7",
