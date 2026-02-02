@@ -122,9 +122,9 @@ export default defineComponent({
     },
     statusText(): string {
       if (this.activeCall) return "On Call";
-      if (this.incomingCall) return "Ringing";
+      if (this.incomingCall) return "Incoming Call";
       if (this.deviceReady) return "Ready";
-      return "Offline";
+      return "Connecting (i hope)...";
     },
     callNumber(): string {
       if (this.activeCall) {
@@ -136,7 +136,6 @@ export default defineComponent({
     formattedDuration(): string {
       const mins = Math.floor(this.callDuration / 60);
       const secs = this.callDuration % 60;
-
       return `${mins.toString().padStart(2, "0")}:${secs
         .toString()
         .padStart(2, "0")}`;
@@ -176,7 +175,6 @@ export default defineComponent({
     async initDevice() {
       try {
         const response = await API.voice.getToken();
-
         const { token } = response.data;
 
         this.device = new Device(token, {
@@ -188,13 +186,9 @@ export default defineComponent({
           this.deviceReady = true;
         });
 
-        this.device.on(
-          "error",
-          (error: { code?: number; message?: string }) => {
-            // 20101 error codeis a invalid token
-            this.deviceReady = false;
-          },
-        );
+        this.device.on("error", () => {
+          this.deviceReady = false;
+        });
 
         this.device.on("incoming", (call: Call) => {
           this.incomingCall = call;
@@ -249,7 +243,7 @@ export default defineComponent({
           this.handleCallEnd();
         });
       } catch (error) {
-        console.error("Call failed:", error);
+        this.$message.error("In gonna kill someone if this keeps failing...");
       }
     },
 
