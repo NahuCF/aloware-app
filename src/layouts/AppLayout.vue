@@ -24,22 +24,28 @@
             }"
           ></span>
         </el-menu-item>
+        <el-menu-item @click="openSms">
+          <i class="el-icon-message"></i>
+          <span>Send SMS</span>
+        </el-menu-item>
       </el-menu>
     </aside>
     <main class="flex-1 bg-gray-100 p-5">
       <router-view />
     </main>
     <Softphone ref="softphone" @status-change="onSoftphoneStatus" />
+    <SmsComposer ref="smsComposer" />
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
 import Softphone from "@/components/Softphone.vue";
+import SmsComposer from "@/components/SmsComposer.vue";
 
 export default defineComponent({
   name: "AppLayout",
-  components: { Softphone },
+  components: { Softphone, SmsComposer },
   data() {
     return {
       softphoneStatus: "" as string,
@@ -48,6 +54,9 @@ export default defineComponent({
   methods: {
     openSoftphone() {
       (this.$refs.softphone as InstanceType<typeof Softphone>).open();
+    },
+    openSms() {
+      (this.$refs.smsComposer as InstanceType<typeof SmsComposer>).open();
     },
     onSoftphoneStatus(status: string) {
       this.softphoneStatus = status;
